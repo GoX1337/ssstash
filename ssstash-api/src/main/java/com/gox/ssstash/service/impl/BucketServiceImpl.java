@@ -1,6 +1,5 @@
 package com.gox.ssstash.service.impl;
 
-import com.fasterxml.jackson.databind.ser.std.FileSerializer;
 import com.gox.ssstash.entity.Bucket;
 import com.gox.ssstash.entity.S3Object;
 import com.gox.ssstash.repository.BucketRepository;
@@ -10,16 +9,16 @@ import com.gox.ssstash.service.FileService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
+import java.io.InputStream;
 import java.util.Optional;
 
 @Service
 @Slf4j
 public class BucketServiceImpl implements BucketService {
 
-    private BucketRepository bucketRepository;
-    private S3ObjectRepository s3ObjectRepository;
-    private FileService fileService;
+    private final BucketRepository bucketRepository;
+    private final S3ObjectRepository s3ObjectRepository;
+    private final FileService fileService;
 
     public BucketServiceImpl(BucketRepository bucketRepository, S3ObjectRepository s3ObjectRepository, FileService fileService) {
         this.bucketRepository = bucketRepository;

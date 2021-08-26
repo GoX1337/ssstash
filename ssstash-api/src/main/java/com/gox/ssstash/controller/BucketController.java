@@ -2,8 +2,6 @@ package com.gox.ssstash.controller;
 
 import com.gox.ssstash.entity.Bucket;
 import com.gox.ssstash.entity.S3Object;
-import com.gox.ssstash.repository.BucketRepository;
-import com.gox.ssstash.repository.S3ObjectRepository;
 import com.gox.ssstash.service.BucketService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,7 +20,7 @@ import java.util.Optional;
 @Slf4j
 public class BucketController {
 
-    private BucketService bucketService;
+    private final BucketService bucketService;
 
     public BucketController(BucketService bucketService) {
         this.bucketService = bucketService;
@@ -32,16 +30,16 @@ public class BucketController {
     public ResponseEntity<Bucket> buckets(@PathVariable String bucketName){
         log.info("Get bucket {}", bucketName);
         Optional<Bucket> bucket = bucketService.findBucketByName(bucketName);
-        if(bucket.isPresent()){
+        if(bucket.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(bucket.get(), HttpStatus.OK);
     }
 
     @PostMapping(value = "/{bucketName}/**", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity createBucket(HttpServletRequest request, @PathVariable String bucketName, @RequestParam("object") MultipartFile objectFile) throws IOException {
+    public ResponseEntity createS3Object(HttpServletRequest request, @PathVariable String bucketName, @RequestParam("object") MultipartFile objectFile) throws IOException {
         String objectKey = request.getRequestURI().replace("/" + bucketName, "");
-        if(objectKey != null && objectKey.length() > 0){
+        if(objectKey.length() > 0){
             objectKey = objectKey.substring(1);
         }
         log.info("Create object {} in bucket {}", bucketName, objectKey);
@@ -63,7 +61,7 @@ public class BucketController {
     @GetMapping(value = "/{bucketName}/**")
     public byte[] getObject(HttpServletRequest request, @PathVariable String bucketName) throws IOException {
         String objectKey = request.getRequestURI().replace("/" + bucketName, "");
-        if(objectKey != null && objectKey.length() > 0){
+        if(objectKey.length() > 0){
             objectKey = objectKey.substring(1);
         }
         log.info("Get object {} in bucket {}", bucketName, objectKey);
@@ -72,7 +70,7 @@ public class BucketController {
     }
 
     @PostMapping(value = "/{bucketName}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity createS3Object(HttpServletRequest request, @PathVariable String bucketName){
+    public ResponseEntity createBucket(@PathVariable String bucketName){
         log.info("Create bucket {}", bucketName);
         Optional<Bucket> bucket = bucketService.findBucketByName(bucketName);
         if(bucket.isPresent()){

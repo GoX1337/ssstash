@@ -2,7 +2,6 @@ package com.gox.ssstash.service;
 
 import com.gox.ssstash.entity.Bucket;
 import com.gox.ssstash.entity.S3Object;
-import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 import java.util.Optional;

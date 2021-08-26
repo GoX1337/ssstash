@@ -7,14 +7,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class CreateFileDirectoryRunner implements CommandLineRunner {
 
-    private FileService fileService;
+    private final FileService fileService;
 
     public CreateFileDirectoryRunner(FileService fileService) {
         this.fileService = fileService;
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         fileService.createFileDirectory();
     }
 }

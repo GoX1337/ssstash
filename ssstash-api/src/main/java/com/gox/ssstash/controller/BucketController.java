@@ -4,6 +4,7 @@ import com.gox.ssstash.entity.Bucket;
 import com.gox.ssstash.entity.S3Object;
 import com.gox.ssstash.repository.BucketRepository;
 import com.gox.ssstash.repository.S3ObjectRepository;
+import com.gox.ssstash.service.BucketService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,49 +16,45 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Optional;
 
 @RestController
 @Slf4j
 public class BucketController {
 
-    public BucketRepository bucketRepository;
-    public S3ObjectRepository s3ObjectRepository;
+    private BucketService bucketService;
 
-    public BucketController(BucketRepository bucketRepository, S3ObjectRepository s3ObjectRepository) {
-        this.bucketRepository = bucketRepository;
-        this.s3ObjectRepository = s3ObjectRepository;
+    public BucketController(BucketService bucketService) {
+        this.bucketService = bucketService;
     }
 
     @GetMapping(value = "/{bucketName}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Bucket> buckets(@PathVariable String bucketName){
         log.info("Get bucket {}", bucketName);
-        Bucket b = bucketRepository.findBucketByName(bucketName);
-        if(b == null){
+        Optional<Bucket> bucket = bucketService.findBucketByName(bucketName);
+        if(bucket.isPresent()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(b, HttpStatus.OK);
+        return new ResponseEntity<>(bucket.get(), HttpStatus.OK);
     }
 
     @PostMapping(value = "/{bucketName}/**", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity createBucket(HttpServletRequest request, @PathVariable String bucketName, @RequestParam("object") MultipartFile objectFile){
+    public ResponseEntity createBucket(HttpServletRequest request, @PathVariable String bucketName, @RequestParam("object") MultipartFile objectFile) throws IOException {
         String objectKey = request.getRequestURI().replace("/" + bucketName, "");
         if(objectKey != null && objectKey.length() > 0){
             objectKey = objectKey.substring(1);
         }
         log.info("Create object {} in bucket {}", bucketName, objectKey);
 
-        Bucket b = bucketRepository.findBucketByName(bucketName);
-        if(b == null){
+        Optional<Bucket> b = bucketService.findBucketByName(bucketName);
+        if(b.isEmpty()){
             return new ResponseEntity<>("Bucket " + bucketName + " not found", HttpStatus.NOT_FOUND);
         } else {
-            S3Object s3Object = s3ObjectRepository.findS3ObjectByBucketNameAndKey(bucketName, objectKey);
-            if(s3Object == null){
-                s3Object = new S3Object();
-                s3Object.setKey(objectKey);
-                s3Object.setBucket(b);
-                return new ResponseEntity<>(s3ObjectRepository.save(s3Object), HttpStatus.OK);
+            Optional<S3Object> s3Object = bucketService.findS3ObjectByBucketNameAndKey(bucketName, objectKey);
+            if(s3Object.isEmpty()){
+                S3Object s3Obj = bucketService.createNewS3Object(b.get(), objectKey, objectFile.getInputStream());
+                return new ResponseEntity<>(s3Obj, HttpStatus.OK);
             } else {
-                log.info(s3Object.toString());
                 return new ResponseEntity<>("S3Object " + objectKey + " already exists", HttpStatus.BAD_REQUEST);
             }
         }
@@ -77,11 +74,11 @@ public class BucketController {
     @PostMapping(value = "/{bucketName}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity createS3Object(HttpServletRequest request, @PathVariable String bucketName){
         log.info("Create bucket {}", bucketName);
-        Bucket b = bucketRepository.findBucketByName(bucketName);
-        if(b != null){
+        Optional<Bucket> bucket = bucketService.findBucketByName(bucketName);
+        if(bucket.isPresent()){
             return new ResponseEntity<>("Bucket " + bucketName + " already exists", HttpStatus.BAD_REQUEST);
         } else {
-            return new ResponseEntity<>(bucketRepository.save(new Bucket(bucketName)), HttpStatus.OK);
+            return new ResponseEntity<>(bucketService.createNewBucket(bucketName), HttpStatus.OK);
         }
     }
 }

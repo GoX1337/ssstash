@@ -23,4 +23,10 @@ public class S3Object {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Bucket bucket;
+
+    public S3Object(String key, String filePath, Bucket bucket) {
+        this.key = key;
+        this.filePath = filePath;
+        this.bucket = bucket;
+    }
 }

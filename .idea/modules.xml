@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/ssstash.iml" filepath="$PROJECT_DIR$/.idea/ssstash.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ssstash-api/ssstash-api.iml" filepath="$PROJECT_DIR$/ssstash-api/ssstash-api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ssstash-client/ssstash-client.iml" filepath="$PROJECT_DIR$/ssstash-client/ssstash-client.iml" />
+    </modules>
+  </component>
+</project>

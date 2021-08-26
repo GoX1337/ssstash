@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Optional;
 
 @RestController
@@ -59,14 +59,17 @@ public class BucketController {
     }
 
     @GetMapping(value = "/{bucketName}/**")
-    public byte[] getObject(HttpServletRequest request, @PathVariable String bucketName) throws IOException {
+    public ResponseEntity getObject(HttpServletRequest request, @PathVariable String bucketName) throws IOException {
         String objectKey = request.getRequestURI().replace("/" + bucketName, "");
         if(objectKey.length() > 0){
             objectKey = objectKey.substring(1);
         }
         log.info("Get object {} in bucket {}", bucketName, objectKey);
-        File file = new File("C:\\Users\\m430504\\IdeaProjects\\ssstash\\ssstash-api\\src\\main\\resources\\image.png");
-        return Files.readAllBytes(file.toPath());
+        Optional<S3Object> s3Object = bucketService.findS3ObjectByBucketNameAndKey(bucketName, objectKey);
+        if(s3Object.isEmpty()){
+            return new ResponseEntity<>(s3Object, HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity(Files.readAllBytes(Path.of(s3Object.get().getFilePath())), HttpStatus.OK);
     }
 
     @PostMapping(value = "/{bucketName}", produces = MediaType.APPLICATION_JSON_VALUE)

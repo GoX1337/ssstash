@@ -27,7 +27,7 @@ public class BucketController {
     }
 
     @GetMapping(value = "/{bucketName}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Bucket> buckets(@PathVariable String bucketName){
+    public ResponseEntity<Object> buckets(@PathVariable String bucketName){
         log.info("Get bucket {}", bucketName);
         Optional<Bucket> bucket = bucketService.findBucketByName(bucketName);
         if(bucket.isEmpty()){
@@ -37,7 +37,7 @@ public class BucketController {
     }
 
     @PostMapping(value = "/{bucketName}/**", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity createS3Object(HttpServletRequest request, @PathVariable String bucketName, @RequestParam("object") MultipartFile objectFile) throws IOException {
+    public ResponseEntity<Object> createS3Object(HttpServletRequest request, @PathVariable String bucketName, @RequestParam("object") MultipartFile objectFile) throws IOException {
         String objectKey = request.getRequestURI().replace("/" + bucketName, "");
         if(objectKey.length() > 0){
             objectKey = objectKey.substring(1);
@@ -59,7 +59,7 @@ public class BucketController {
     }
 
     @GetMapping(value = "/{bucketName}/**")
-    public ResponseEntity getObject(HttpServletRequest request, @PathVariable String bucketName) throws IOException {
+    public ResponseEntity<Object> getObject(HttpServletRequest request, @PathVariable String bucketName) throws IOException {
         String objectKey = request.getRequestURI().replace("/" + bucketName, "");
         if(objectKey.length() > 0){
             objectKey = objectKey.substring(1);
@@ -69,11 +69,11 @@ public class BucketController {
         if(s3Object.isEmpty()){
             return new ResponseEntity<>(s3Object, HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity(Files.readAllBytes(Path.of(s3Object.get().getFilePath())), HttpStatus.OK);
+        return new ResponseEntity<>(Files.readAllBytes(Path.of(s3Object.get().getFilePath())), HttpStatus.OK);
     }
 
     @PostMapping(value = "/{bucketName}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity createBucket(@PathVariable String bucketName){
+    public ResponseEntity<Object> createBucket(@PathVariable String bucketName){
         log.info("Create bucket {}", bucketName);
         Optional<Bucket> bucket = bucketService.findBucketByName(bucketName);
         if(bucket.isPresent()){

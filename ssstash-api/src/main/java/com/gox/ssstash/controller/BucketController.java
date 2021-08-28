@@ -70,8 +70,8 @@ public class BucketController {
         if(s3Object.isEmpty()){
             return new ResponseEntity<>(s3Object, HttpStatus.NOT_FOUND);
         }
-        HttpHeaders responseHeaders = new HttpHeaders();
         String mimeType = s3Object.get().getMimeType();
+        HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.set("Content-type", mimeType != null ? mimeType : "application/octet-stream");
         byte[] file = Files.readAllBytes(Path.of(s3Object.get().getFilePath()));
         return new ResponseEntity<>(file, responseHeaders, HttpStatus.OK);

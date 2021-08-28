@@ -13,5 +13,5 @@ public interface BucketService {
 
     Optional<S3Object> findS3ObjectByBucketNameAndKey(String bucketName, String objectKey);
 
-    S3Object createNewS3Object(Bucket bucket, String objectKey, InputStream objectInputStream);
+    S3Object createNewS3Object(Bucket bucket, String objectKey, String filename, InputStream objectInputStream);
 }

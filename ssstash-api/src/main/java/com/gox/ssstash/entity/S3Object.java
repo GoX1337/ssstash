@@ -22,14 +22,16 @@ public class S3Object {
     private Long id;
     private String key;
     private String filePath;
+    private String mimeType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonBackReference
     private Bucket bucket;
 
-    public S3Object(String key, String filePath, Bucket bucket) {
+    public S3Object(String key, String filePath, String mimeType, Bucket bucket) {
         this.key = key;
         this.filePath = filePath;
+        this.mimeType = mimeType;
         this.bucket = bucket;
     }
 }

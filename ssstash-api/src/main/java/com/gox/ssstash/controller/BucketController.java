@@ -4,6 +4,7 @@ import com.gox.ssstash.entity.Bucket;
 import com.gox.ssstash.entity.S3Object;
 import com.gox.ssstash.service.BucketService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -50,7 +51,7 @@ public class BucketController {
         } else {
             Optional<S3Object> s3Object = bucketService.findS3ObjectByBucketNameAndKey(bucketName, objectKey);
             if(s3Object.isEmpty()){
-                S3Object s3Obj = bucketService.createNewS3Object(b.get(), objectKey, objectFile.getInputStream());
+                S3Object s3Obj = bucketService.createNewS3Object(b.get(), objectKey, objectFile.getOriginalFilename(), objectFile.getInputStream());
                 return new ResponseEntity<>(s3Obj, HttpStatus.OK);
             } else {
                 return new ResponseEntity<>("S3Object " + objectKey + " already exists", HttpStatus.BAD_REQUEST);
@@ -69,7 +70,10 @@ public class BucketController {
         if(s3Object.isEmpty()){
             return new ResponseEntity<>(s3Object, HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(Files.readAllBytes(Path.of(s3Object.get().getFilePath())), HttpStatus.OK);
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.set("Content-type", s3Object.get().getMimeType());
+        byte[] file = Files.readAllBytes(Path.of(s3Object.get().getFilePath()));
+        return new ResponseEntity<>(file, responseHeaders, HttpStatus.OK);
     }
 
     @PostMapping(value = "/{bucketName}", produces = MediaType.APPLICATION_JSON_VALUE)

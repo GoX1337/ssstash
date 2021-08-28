@@ -1,5 +1,6 @@
 package com.gox.ssstash.service.impl;
 
+import com.gox.ssstash.component.MimeType;
 import com.gox.ssstash.entity.Bucket;
 import com.gox.ssstash.entity.S3Object;
 import com.gox.ssstash.repository.BucketRepository;
@@ -19,11 +20,13 @@ public class BucketServiceImpl implements BucketService {
     private final BucketRepository bucketRepository;
     private final S3ObjectRepository s3ObjectRepository;
     private final FileService fileService;
+    private final MimeType mimeType;
 
-    public BucketServiceImpl(BucketRepository bucketRepository, S3ObjectRepository s3ObjectRepository, FileService fileService) {
+    public BucketServiceImpl(BucketRepository bucketRepository, S3ObjectRepository s3ObjectRepository, FileService fileService, MimeType mimeType) {
         this.bucketRepository = bucketRepository;
         this.s3ObjectRepository = s3ObjectRepository;
         this.fileService = fileService;
+        this.mimeType = mimeType;
     }
 
     @Override
@@ -42,8 +45,8 @@ public class BucketServiceImpl implements BucketService {
     }
 
     @Override
-    public S3Object createNewS3Object(Bucket bucket, String objectKey, InputStream objectInputStream) {
+    public S3Object createNewS3Object(Bucket bucket, String objectKey, String filename, InputStream objectInputStream) {
         String path = fileService.saveFile(bucket, objectKey, objectInputStream);
-        return s3ObjectRepository.save(new S3Object(objectKey, path, bucket));
+        return s3ObjectRepository.save(new S3Object(objectKey, path, mimeType.getMimeType(filename), bucket));
     }
 }

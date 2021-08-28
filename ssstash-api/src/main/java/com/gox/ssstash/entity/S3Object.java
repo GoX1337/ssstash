@@ -1,5 +1,8 @@
 package com.gox.ssstash.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,6 +24,7 @@ public class S3Object {
     private String filePath;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference
     private Bucket bucket;
 
     public S3Object(String key, String filePath, Bucket bucket) {
